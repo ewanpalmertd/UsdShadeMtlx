@@ -7,3 +7,5 @@ def executeTimeDecorator(function):
         function(*args, **kwargs)
         end = time.perf_counter()
         print(f"{(end - start):.5f}")
+
+    return wrapper

@@ -4,6 +4,7 @@
 import os
 import logging
 import re
+from utils import executeTimeDecorator
 from pathlib import Path
 from typing import List, Dict, Optional
 from bs4 import BeautifulSoup
@@ -46,6 +47,7 @@ def get_parameter_value(param: str, data: str):
     return matches
 
 
+@executeTimeDecorator
 def parse_mtlx_definitions(definitions: List[str]) -> None:
     """
     Takes the raw materialx definitions and converts
