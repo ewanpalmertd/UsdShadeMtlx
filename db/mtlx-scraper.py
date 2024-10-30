@@ -36,6 +36,7 @@ def split_mtlx_definitions(input_file: str = STDLIB) -> List[str]:
     with open(input_file) as file:
         contents = file.read().split("</nodedef>")
         for line in contents:
+            # this is stupid, fix asap
             output_list.append(f"<nodedef {line.split('<nodedef ')[-1]}")
 
     return output_list
