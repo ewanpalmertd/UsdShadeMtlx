@@ -1,2 +1,3 @@
 *.mtlx
 *.xml
+/mtlx-scraper.py
