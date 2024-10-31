@@ -1,20 +1,23 @@
+import glob
+import os
 import logging
 from pathlib import Path
 from utils import executeTimeDecorator
 from typing import List, Dict, Optional
 import xml.etree.ElementTree as ET
 
-xml_file: str = str(Path(__file__).with_name("test.xml"))
+files: List[str] = glob.glob(f"{os.getcwd()}/*.xml")
 
 # TODO
-# > check all input and output types to start figuring ways out how to filter them
-# > filter all input/output data and convert it to usdAPI readable data
+# download other mtlx libraries and convert to xml
+# test parse function on other xml files
+# sort dictionary output so inputs are in list 1 and outputs in list 2
+# ^^ atm the lists are all messed up
+# combine dictionaries between all xml files
+# write function to convert data types to Sdf.ValueTypes and replace into dictionary
 
 
-@executeTimeDecorator
-def parse_xml_file(
-    input_file: str,
-):  # might need to sort return data later, we shall see
+def parse_xml_file(input_file: str):
     """
     Given a .xml file. this function will parse it and get the relevant data
     in this case, it is parsing all the needed information from the materialx stdlib
@@ -42,4 +45,5 @@ def parse_xml_file(
 
 
 if __name__ == "__main__":
-    parse_xml_file(input_file=xml_file)
+    a = parse_xml_file(input_file=files[-1])
+    print(a)
