@@ -31,19 +31,17 @@ def parse_xml_file(input_file: str):
         if not name.startswith("ND"):
             continue
 
-        inputs = {}
-        outputs = {}
-        for i in child:
-            input_name = i.attrib["name"]
-            input_type = i.attrib["type"]
+        inputs, outputs = {}, {}
+        for node in child:
+            iname, itype = node.attrib["name"], node.attrib["type"]
             try:
-                input_value = i.attrib["value"]
+                ivalue = node.attrib["value"]
             except KeyError:
-                input_value = None
-            if i.tag == "input":
-                inputs[input_name] = [input_type, input_value]
+                ivalue = None
+            if node.tag == "input":
+                inputs[iname] = [itype, ivalue]
             else:
-                outputs[input_name] = [input_type, input_value]
+                outputs[iname] = [itype, ivalue]
 
         children[name] = [inputs, outputs]
 
