@@ -30,20 +30,33 @@ def parse_xml_file(input_file: str):
         name: str = child.attrib["name"]
         if not name.startswith("ND"):
             continue
-        inputs = []
-        outputs = []
-        children[name] = [inputs, outputs]
+
+        inputs = {}
+        outputs = {}
         for i in child:
-            io_tag = i.tag
-            io_attrib = i.attrib
-            if io_tag == "input":
-                inputs.append(io_attrib)
-            elif io_tag == "output":
-                outputs.append(io_attrib)
+            input_name = i.attrib["name"]
+            input_type = i.attrib["type"]
+            try:
+                input_value = i.attrib["value"]
+            except KeyError:
+                input_value = None
+            if i.tag == "input":
+                inputs[input_name] = [input_type, input_value]
+            else:
+                outputs[input_name] = [input_type, input_value]
+
+        children[name] = [inputs, outputs]
 
     return children
 
 
 if __name__ == "__main__":
-    a = parse_xml_file(input_file=files[-1])
-    print(a)
+    import time
+
+    start = time.perf_counter()
+    for i in files:
+        print("-------------------------------------")
+        print(parse_xml_file(input_file=i))
+        print("-------------------------------------")
+    end = time.perf_counter()
+    print(f"{(end - start):.5f}")
