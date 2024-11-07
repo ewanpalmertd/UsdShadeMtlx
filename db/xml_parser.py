@@ -1,44 +1,14 @@
 import glob
 import os
-import logging
 from pxr import Sdf
 from pathlib import Path
-from utils import executeTimeDecorator
+from utils import time_execution, converted_value_types
 from typing import List, Dict, Optional
 import xml.etree.ElementTree as ET
 
 files: List[str] = glob.glob(f"{os.getcwd()}/*.xml")
 
-# look at filename value type
-VALUE_TYPES = {
-    "string": Sdf.ValueTypeNames.String,
-    "float": Sdf.ValueTypeNames.Float,
-    "integer": Sdf.ValueTypeNames.Int, #double check signed/unsiged and 32/64 bit int
-    "color3": Sdf.ValueTypeNames.Color3f,
-    "color4": Sdf.ValueTypeNames.Color4f,
-    "vector2": Sdf.ValueTypeNames.Float2,
-    "vector3": Sdf.ValueTypeNames.Float3, # double check vector types if Float3 or Vector3f
-    "vector4": Sdf.ValueTypeNames.Float4,
-    "vector2array": Sdf.ValueTypeNames.Float2Array,
-    "matrix33": Sdf.ValueTypeNames.Matrix3d,
-    "matrix44": Sdf.ValueTypeNames.Matrix4d,
-    "boolean" : Sdf.ValueTypeNames.Bool,
-}
-
-# ^^^^^^^^^^^^^^^^^^
-"""
-Need to check types:
-surfaceshader
-displacementshader
-volumeshader
-filename
-lightshader
-filename
-EDF
-BSDF
-VDF
-"""
-
+VALUE_TYPES = converted_value_types()
 
 # TODO
 # download other mtlx libraries and convert to xml
@@ -105,7 +75,7 @@ def convert_data_types_to_sdf(mtlx_dictionary):
             if input_name in VALUE_TYPES:
                 converted_input = VALUE_TYPES[input_name]
             else:
-                converted_input = input_name
+                converted_input = Sdf.ValueTypeNames.String
             inputs[input][0] = converted_input
   
         for output in outputs.keys():
@@ -139,18 +109,24 @@ def get_unique_data_types(mtlx_dictionary) -> List[str]:
             
     return unique_list
 
+def combine_dicionaries(files : List[str]):
+    """
+    combines all of the xml dictionaries into a single dictionary
+    """
+    dictionary = {}
+    for file in files:
+        unconverted_dictionary = parse_xml_file(input_file=file)
+        converted_dictionary = convert_data_types_to_sdf(mtlx_dictionary=unconverted_dictionary)
+        for key in unconverted_dictionary.keys():
+            dictionary[key] = unconverted_dictionary[key]
+
+    return dictionary
+
+MTLX_DICTIONARY = combine_dicionaries(files=files)
+
 if __name__ == "__main__":
     import time
-    test : str = files[-1]
     start = time.perf_counter()
-    #shaders = parse_xml_file(input_file=test)
-    #converted_shaders = convert_data_types_to_sdf(mtlx_dictionary=shaders)
-    #get_unique_data_types(shaders)
-    Sdf.ValueTypeNames.Float2Array
-    for i in files:
-        shaders = parse_xml_file(input_file=i)
-        data_types = get_unique_data_types(mtlx_dictionary=shaders)
-        for type in data_types:
-            if type not in VALUE_TYPES.keys(): print(type)
+    a = combine_dicionaries(files=files)
     end = time.perf_counter()
     print(f"{(end - start):.5f}")
