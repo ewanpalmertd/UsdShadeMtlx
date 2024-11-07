@@ -99,7 +99,6 @@ def get_unique_data_types(mtlx_dictionary) -> List[str]:
     :mtlx_dictionary - dict: -> the unconverted dictionary to get the value types from
     """
     unique_list = []
-
     for node in mtlx_dictionary.keys():
         inputs = mtlx_dictionary[node][0]
         for input in inputs:
@@ -116,7 +115,7 @@ def combine_dicionaries(files : List[str]):
     dictionary = {}
     for file in files:
         unconverted_dictionary = parse_xml_file(input_file=file)
-        converted_dictionary = convert_data_types_to_sdf(mtlx_dictionary=unconverted_dictionary)
+        #converted_dictionary = convert_data_types_to_sdf(mtlx_dictionary=unconverted_dictionary)
         for key in unconverted_dictionary.keys():
             dictionary[key] = unconverted_dictionary[key]
 
