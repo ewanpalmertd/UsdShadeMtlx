@@ -29,7 +29,8 @@ def parse_xml_file(input_file: str):
         name: str = child.attrib["name"]
         if not name.startswith("ND"):
             continue
-
+        
+        name = name.replace("ND_", "")
         inputs, outputs = {}, {}
         for node in child:
             iname, itype = node.attrib["name"], node.attrib["type"]
@@ -85,6 +86,6 @@ MTLX_DICTIONARY = combine_dicionaries(files=files)
 if __name__ == "__main__":
     import time
     start = time.perf_counter()
-    a = combine_dicionaries(files=files)
+    print(MTLX_DICTIONARY.keys())
     end = time.perf_counter()
     print(f"{(end - start):.5f}")
