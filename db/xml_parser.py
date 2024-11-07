@@ -2,13 +2,10 @@ import glob
 import os
 from pxr import Sdf
 from pathlib import Path
-from utils import time_execution, converted_value_types
 from typing import List, Dict, Optional
 import xml.etree.ElementTree as ET
 
 files: List[str] = glob.glob(f"{os.getcwd()}/*.xml")
-
-VALUE_TYPES = converted_value_types()
 
 # TODO
 # download other mtlx libraries and convert to xml
@@ -53,43 +50,6 @@ def parse_xml_file(input_file: str):
 
     return children
 
-
-def convert_data_types_to_sdf(mtlx_dictionary):
-    """
-    Takes the mtlx dictionary and converts the data types
-    to sdf supported format rather than string format
-
-    Args:
-    ----
-        mtlx_dictionary - the xml converted materialx dictionary
-    """
-    converted_dictionary = {} # change variable name
-    for node in mtlx_dictionary.keys():
-        inputs  = mtlx_dictionary[node][0]
-        outputs = mtlx_dictionary[node][1]
-
-        # loop through each individual input
-        # might avoid doing loop as we could maybe do it another way
-        for input in inputs.keys():
-            input_name = inputs[input][0]
-            if input_name in VALUE_TYPES:
-                converted_input = VALUE_TYPES[input_name]
-            else:
-                converted_input = Sdf.ValueTypeNames.String
-            inputs[input][0] = converted_input
-  
-        for output in outputs.keys():
-            output_name = outputs[output][0]
-            if output_name in VALUE_TYPES:
-                converted_output = VALUE_TYPES[output_name]
-            else:
-                converted_output = Sdf.ValueTypeNames.Token
-            outputs[output][0] = converted_output
-            
-        converted_dictionary[node] = mtlx_dictionary[node]
-
-    return converted_dictionary
-
 def get_unique_data_types(mtlx_dictionary) -> List[str]:
     """
     Uses the dictionary as an input and returns a list of all the unique
@@ -115,7 +75,6 @@ def combine_dicionaries(files : List[str]):
     dictionary = {}
     for file in files:
         unconverted_dictionary = parse_xml_file(input_file=file)
-        #converted_dictionary = convert_data_types_to_sdf(mtlx_dictionary=unconverted_dictionary)
         for key in unconverted_dictionary.keys():
             dictionary[key] = unconverted_dictionary[key]
 
