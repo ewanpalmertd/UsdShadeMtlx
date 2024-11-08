@@ -56,35 +56,36 @@ USDSHADEMTLX_DATABASE = load_json(input_file=json_path)
 # TODO: remove the ND_prefix from the list to start as it makes
 # it much harder to search and to write
 
-class UsdShadeMtlxUtils:
+# NOTE : GOING TO INHERIT IN MAIN CLASS RATHER THAN HAVE A WHOLE 
+# SEPERATE CLASS 
 
-    def __init__(self) -> None:
-        self.database = load_json(input_file=json_path)
+# class UsdShadeMtlxUtils:
 
-    def get_nodes(self) -> List[str]:
-        """
-        Prints all of the different nodes that you can choose in the db
-        """
-        keys = list(self.database.keys())
-        return keys
+#     def __init__(self) -> None:
+#         self.database = load_json(input_file=json_path)
+
+#     def get_nodes(self) -> List[str]:
+#         """
+#         Prints all of the different nodes that you can choose in the db
+#         """
+#         keys = list(self.database.keys())
+#         return keys
     
-    def search_for_node(self, search : str):
-        """
-        Given a string to search with, it will filter all nodes and 
-        return nodes matching the filter
-        """
-        if not search: print("Please enter a valid keyword")
+#     def search_for_node(self, search : str):
+#         """
+#         Given a string to search with, it will filter all nodes and 
+#         return nodes matching the filter
+#         """
+#         if not search: print("Please enter a valid keyword")
 
-        all_nodes = self.get_nodes()
-        filtered_nodes = [ node for node in all_nodes if search in node ]
-        return filtered_nodes
+#         all_nodes = self.get_nodes()
+#         filtered_nodes = [ node for node in all_nodes if search in node ]
+#         return filtered_nodes
         
 
 if __name__ == "__main__":
     import time
     start = time.perf_counter()
     a = UsdShadeMtlxUtils()
-    filtered_nodes = a.search_for_node(search="noise")
-    print(filtered_nodes)
     end = time.perf_counter()
     print(f"{(end - start):.5f}")
