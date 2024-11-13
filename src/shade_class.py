@@ -89,7 +89,10 @@ class UsdShadeMtlxClass:
             input_name = input
             input_type, input_value = inputs[input][0], inputs[input][1]
             shader.CreateInput(input_name, input_type).Set(input_value)
-            
+
+        outputs = self.Utils().getOutputs(id=id)
+        for output in outputs.keys():
+            shader.CreateOutput(output, outputs[output][0])
 
         return shader
 
@@ -100,6 +103,6 @@ if __name__ == "__main__":
 
     stage = UsdShadeMtlx.createLocalStage(filepath="test.usda")
     material = UsdShadeMtlx.createMaterial(stage=stage, path=path)
-    shader = UsdShadeMtlx.createShader(stage=stage, path=f"{path}/surface", id="surface")
+    shader = UsdShadeMtlx.createShader(stage=stage, path=f"{path}/surface", id="standard_surface_surfaceshader")
     stage.Save()
     
