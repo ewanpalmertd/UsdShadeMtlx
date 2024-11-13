@@ -29,15 +29,27 @@ def convert_data_types_to_sdf(mtlx_dictionary):
         for input in inputs.keys():
             input_name = inputs[input][0]
             if input_name in VALUE_TYPES:
-                converted_input = VALUE_TYPES[input_name]
+                converted_input = VALUE_TYPES[input_name][0]
+                # if "matrix" in input_name:
+                #     print(input_name, inputs[input][1])
+                if len(VALUE_TYPES[input_name]) > 2:
+                    try:
+                        converted_default = VALUE_TYPES[input_name][1](
+                            string_value=inputs[input][1], size=VALUE_TYPES[input_name][2])
+                    except Exception as e:
+                        print(input_name, inputs[input][1], e)
+                else:
+                    converted_default = VALUE_TYPES[input_name][1](string_value=inputs[input][1])
             else:
                 converted_input = Sdf.ValueTypeNames.String
+                converted_default = ""
             inputs[input][0] = converted_input
+            inputs[input][1] = converted_default
   
         for output in outputs.keys():
             output_name = outputs[output][0]
             if output_name in VALUE_TYPES:
-                converted_output = VALUE_TYPES[output_name]
+                converted_output = VALUE_TYPES[output_name][0]
             else:
                 converted_output = Sdf.ValueTypeNames.Token
             outputs[output][0] = converted_output
