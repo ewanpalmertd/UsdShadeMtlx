@@ -77,13 +77,8 @@ def converted_value_types() -> Dict[str, Sdf.ValueTypeNames]:
 
     return types
 
-def foo(spam, eggs):
-    print(spam, eggs)
-
 if __name__ == "__main__":
     sample = '0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0'
 
     # print(matrix_conversion(string_value=sample))
     # print(matrix_conversion(string_value="", size=4))
-    l = [foo(spam="A")]
-    l[0](eggs="bruh")
