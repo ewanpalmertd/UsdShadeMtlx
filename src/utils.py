@@ -42,9 +42,6 @@ def vector_conversion(string_value, size:int=0):
     return vector   
 
 def matrix_conversion(string_value, size:int=0):
-    # in future updates, I intend to move this to Gf.Matrix4
-    # afaik usd inputs only deal with square matrices which means we can use
-    # fixed matrix sizes for 3 and 4
     if not string_value:
         matrix = tuple([tuple([0.0 for i in range(size)]) for i in range(size)])
     else:
@@ -60,7 +57,6 @@ def converted_value_types() -> Dict[str, Sdf.ValueTypeNames]:
     """
     contains the converted value types from string to sdf
     """
-    # "vector2array": Sdf.ValueTypeNames.Float2Array,
     types = {
     "string": [Sdf.ValueTypeNames.String, string_conversion],
     "float": [Sdf.ValueTypeNames.Float, float_conversion],
@@ -79,6 +75,3 @@ def converted_value_types() -> Dict[str, Sdf.ValueTypeNames]:
 
 if __name__ == "__main__":
     sample = '0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0'
-
-    # print(matrix_conversion(string_value=sample))
-    # print(matrix_conversion(string_value="", size=4))

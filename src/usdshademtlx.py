@@ -1,7 +1,8 @@
 from pxr import Sdf, Usd, UsdShade, Tf, UsdGeom
 from config import USDSHADEMTLX_DATABASE
 from typing import List
-from shader import UsdShadeShader
+from shader import UsdShadeMtlxShader
+from material import UsdShadeMtlxMaterial
 from utils import time_execution
 import logging
 
@@ -24,11 +25,11 @@ FUNCTIONS:
 - add function for assigning random display colors
 """
 
-class UsdShadeMtlxClass:
+class UsdShadeMtlx:
     # if we import the class only, need to make sure that all the modules are imported here
     # also make sure to check for missing modules (especially pxr modules) 
 
-    class Shader(UsdShadeShader):
+    class Shader(UsdShadeMtlxShader):
         def __init__(self, stage: Usd.Stage, path: str, id: str) -> None:
             self.database = USDSHADEMTLX_DATABASE
             self.stage    = stage 
@@ -62,12 +63,19 @@ class UsdShadeMtlxClass:
             for output in self.outputs.keys():
                 self.shader.CreateOutput(output, self.outputs[output][0])
     
+    class Material(UsdShadeMtlxMaterial):
+        def __init__(self, stage: Usd.Stage, path: str) -> None:
+            self.stage = stage
+            self.path = path
+
+            self.__setup()
+
+        def __setup(self) -> None:
+            self.material: UsdShade.Material = UsdShade.Material.Define(self.stage, self.path)
+
     def __init__(self) -> None:
         self.database = USDSHADEMTLX_DATABASE
 
-    def getShaders(self):
-            return list(self.database.keys())
-    
     def searchForShader(self, filter:str) -> List[str]:
             # this needs better implementation
             filtered_list = []
@@ -78,7 +86,7 @@ class UsdShadeMtlxClass:
                 logging.warning("Could not find any matches")
                 return
           
-    def createLocalStage(self, filepath:str) -> Usd.Stage:
+    def CreateLocalStage(self, filepath:str) -> Usd.Stage:
         """
         Creates a local USD stage from a given filepath
 
@@ -96,21 +104,9 @@ class UsdShadeMtlxClass:
             logging.error("Passed invalid file path")
             return 0
 
-    def CreateMaterial(self, stage:Usd.Stage, path:str) -> UsdShade.Material:
-        # need to check if stage is valid and if path is valid
-        # write this into another function and use usd API to check
-        # rather than checking manually
-        return UsdShade.Material.Define(stage, path)
-
-    def AssignMaterial(self, prim, material) -> None:
-        # need to be able to assign this from given path not just prim, leave as is for now
-        assignable_prim = prim
-        assignable_prim.ApplyAPI(UsdShade.MaterialBindingAPI)
-        UsdShade.MaterialBindingAPI(prim).Bind(material)
-
 if __name__ == "__main__":
-    UsdShadeMtlx = UsdShadeMtlxClass() # need to rename class
-    stage = UsdShadeMtlx.createLocalStage(filepath="shader_test.usda")
+    UsdShadeMtlx = UsdShadeMtlx() # need to rename class
+    stage = UsdShadeMtlx.CreateLocalStage(filepath="shader_test.usda")
     
     root = UsdGeom.Scope.Define(stage, Sdf.Path("/root"))
     materials = UsdGeom.Scope.Define(stage, Sdf.Path("/root/materials"))
@@ -124,7 +120,7 @@ if __name__ == "__main__":
 
     @time_execution
     def main():
-        material = UsdShadeMtlx.CreateMaterial(stage, Sdf.Path("/root/materials/mtl_main"))
+        material = UsdShadeMtlx.Material(stage, Sdf.Path("/root/materials/mtl_main"))
         surface = UsdShadeMtlx.Shader(stage, "/root/materials/mtl_main/surface", "standard_surface_surfaceshader")
         surface.SetParameters({
             "base_color": (0, 0, 0.8),
@@ -133,11 +129,9 @@ if __name__ == "__main__":
 
         image = UsdShadeMtlx.Shader(stage, "/root/materials/mtl_main/picture", "image_color3")
         image.SetParameter("file", "/home/epalmer/Pictures/wallpapers/Knights.png")
-        
         surface.ConnectInput("base_color", image, "out")
         surface.ConnectToMaterial(material, "out")
-        UsdShadeMtlx.AssignMaterial(ref_prim, material)
-
+        material.AssignToPath(Sdf.Path("/root/seal"))
 
 
     main()

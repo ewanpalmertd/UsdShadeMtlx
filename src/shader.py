@@ -4,7 +4,7 @@ from typing import List, Dict, Any
 from config import USDSHADEMTLX_DATABASE
 from utils import time_execution
 
-class UsdShadeShader:
+class UsdShadeMtlxShader:
     def __init__(self, stage: Usd.Stage, path: str, id: str) -> None:
         # constructor for shader class
         # create local stage if none is given, for unit testing
@@ -20,6 +20,7 @@ class UsdShadeShader:
             logging.error("Received invalid Shader ID")
             return 0
         
+        # add more verbose reasoning
         if self.id == "standard_surface_surfaceshader": 
             self.id = f"{self.id}_100" # 100 shader is the correct shader
             valid_id: str = "ND_standard_surface_surfaceshader"
@@ -63,7 +64,7 @@ class UsdShadeShader:
 
     def ConnectToMaterial(self, material, output: str) -> None:
         # same thing here where we automate the output if there is only one output
-        material.CreateSurfaceOutput().ConnectToSource(self.shader.ConnectableAPI(), output)
+        material.material.CreateSurfaceOutput().ConnectToSource(self.shader.ConnectableAPI(), output)
 
     def ConnectInput(self, input: str, source, output: str) -> None:
         # remember to add fallback for incorrect input
@@ -74,6 +75,8 @@ class UsdShadeShader:
         type=self.inputs[input][0]
         self.shader.CreateInput(input, type).ConnectToSource(source.shader.ConnectableAPI(), output)
 
+    def GetShaders(self):
+        return list(self.database.keys())
 
 if __name__ == "__main__":
     pass
