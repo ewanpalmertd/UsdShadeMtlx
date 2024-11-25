@@ -4,6 +4,20 @@ from typing import List, Dict, Optional
 import os
 import logging
 
+"""
+MISSING FUNCTIONS:
+- set parameter
+- set input
+- set output
+- revert parameter to default
+- assign shader
+- unassign shader? not prio
+- in assign shader make sure to select material purpose
+- function for setting material purpose
+- add function for assigning random display colors
+- when setting inputs make sure to accompany for different data types in usd, Gf/Vt
+"""
+
 class UsdShadeMtlxClass:
 
     def __init__(self) -> None:
@@ -38,14 +52,6 @@ class UsdShadeMtlxClass:
                 logging.warning("Could not find any matches")
                 return
             
-            print(filtered_list)
-            
-        
-
-    # create local stage (in memory)
-    # open external stage
-    # crete new local stage
-
     def createLocalStage(self, filepath:str) -> Usd.Stage:
         """
         Creates a local USD stage from a given filepath
@@ -95,8 +101,14 @@ class UsdShadeMtlxClass:
             shader.CreateOutput(output, outputs[output][0])
 
         return shader
+    
+    def AssignMaterial(self, stage, obj_path: str) -> None:
+        # assigns shader to object
+        # need to check if this works with the Shader class
+        pass
 
 if __name__ == "__main__":
+    # create a sphere to test material assignments on
     UsdShadeMtlx = UsdShadeMtlxClass()
     Utils = UsdShadeMtlx.Utils()
     path = "/materials/MTL_test"
