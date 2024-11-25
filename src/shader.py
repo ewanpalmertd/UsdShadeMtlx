@@ -1,12 +1,8 @@
-from pxr import Usd, UsdShade, Sdf, Vt, Gf, UsdGeom
+from pxr import Usd, UsdShade
 import logging
-from typing import List, Optional, Dict, Any
+from typing import List, Dict, Any
 from config import USDSHADEMTLX_DATABASE
-from shade_class import UsdShadeMtlxClass
 from utils import time_execution
-
-UsdShadeMtlx = UsdShadeMtlxClass()
-Utils = UsdShadeMtlxClass().Utils()
 
 class UsdShadeShader:
     def __init__(self, stage: Usd.Stage, path: str, id: str) -> None:
@@ -17,7 +13,9 @@ class UsdShadeShader:
         self.path     = path
         self.id       = id
 
-        # creating shader (might put into different function)
+        self.__setup()
+
+    def __setup(self) -> None:
         if self.id not in self.database.keys():
             logging.error("Received invalid Shader ID")
             return 0
@@ -31,40 +29,45 @@ class UsdShadeShader:
         self.shader.CreateIdAttr(valid_id)
 
         # create inputs
-        self.inputs = Utils.getInputs(id=self.id)
+        self.inputs = self.GetInputs()
         for input in self.inputs.keys():
             input_name = input
             input_type, input_value = self.inputs[input][0], self.inputs[input][1]
             self.shader.CreateInput(input_name, input_type).Set(input_value)
 
-        self.outputs = Utils.getOutputs(id=self.id)
+        self.outputs = self.GetOutputs()
         for output in self.outputs.keys():
             self.shader.CreateOutput(output, self.outputs[output][0])
 
     def GetInputs(self) -> None:
+        self.inputs = self.database[self.id][0]
         return self.inputs
     
     def GetOutputs(self) -> None:
+        self.outputs = self.database[self.id][1]
         return self.outputs
     
-    def GetParamaters(self) -> List[str]:
+    def GetParameters(self) -> List[str]:
         return list(self.inputs.keys())
 
-    def SetParamater(self, param: str, value) -> None:
+    def SetParameter(self, param: str, value) -> None:
         
         if not param in self.inputs.keys(): logging.error("Unable to find parameter")
 
         type = self.inputs[param][0]
         self.shader.CreateInput(param, type).Set(value)
 
-    def SetParamaters(self, input: Dict[str, Any]) -> None:
-        pass
+    def SetParameters(self, input: Dict[str, Any]) -> None:
+        for key, value in input.items():
+            self.SetParameter(param=key, value=value)
 
     def ConnectToMaterial(self, material, output: str) -> None:
+        # same thing here where we automate the output if there is only one output
         material.CreateSurfaceOutput().ConnectToSource(self.shader.ConnectableAPI(), output)
 
     def ConnectInput(self, input: str, source, output: str) -> None:
         # remember to add fallback for incorrect input
+        # forget last argument if there is only one output on the node 
         if not input in list(self.inputs.keys()): logging.error("Invalid input parameter")
         if not output in list(source.outputs.keys()): logging.error("Invalid output parameter")
 
@@ -73,33 +76,5 @@ class UsdShadeShader:
 
 
 if __name__ == "__main__":
-    # standard_surface.CreateInput("base_color", Sdf.ValueTypeNames.Color3f).ConnectToSource(image.ConnectableAPI(), "out")
-    @time_execution
-    def main():
-        path = "/materials/mtl_main"
-        texture = "/home/epalmer/Pictures/wallpapers/Knights.png"
-        stage = UsdShadeMtlx.createLocalStage(filepath="shader_test.usda")
-
-        ref_prim = UsdGeom.Scope.Define(stage, Sdf.Path("/ref")).GetPrim()
-        references = ref_prim.GetReferences()
-        references.AddReference(
-            assetPath="/home/epalmer/Desktop/root/bin/seal_model_flattened.usda",
-            primPath=Sdf.Path("/sopimport1")
-        )
-
-        material = UsdShadeMtlx.createMaterial(stage=stage, path=path)
-
-        standard_surface = UsdShadeShader(stage=stage, path=f"{path}/surface", id="standard_surface_surfaceshader")
-        standard_surface.SetParamater("base_color", (1, 0, 0))
-        standard_surface.SetParamater("specular_roughness", (0.0))
-        standard_surface.ConnectToMaterial(material=material, output="out")
-
-        image = UsdShadeShader(stage=stage, path=f"{path}/image", id="image_color3")
-        image.SetParamater("file", texture)
-        standard_surface.ConnectInput(input="base_color", source=image, output="out")
-        ref_prim.ApplyAPI(UsdShade.MaterialBindingAPI)
-        UsdShade.MaterialBindingAPI(ref_prim).Bind(material)
-
-        stage.Save()
-
-    main()
+    pass
+    
