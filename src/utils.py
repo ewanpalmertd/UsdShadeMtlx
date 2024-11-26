@@ -1,5 +1,6 @@
 from typing import Dict, Tuple
 from pxr import Sdf, Gf
+import logging
 
 def time_execution(function):
     def wrapper(*args, **kwargs):
@@ -73,5 +74,13 @@ def converted_value_types() -> Dict[str, Sdf.ValueTypeNames]:
 
     return types
 
+def check_path(path: Sdf.Path) -> bool:
+    #if path.isEmpty: logging.error("Given path is empty, please provide a valid path."); return 0
+    if not Sdf.Path.IsValidPathString(path.pathString): raise Exception("Found forbidden characters in path.")
+    if path.isEmpty: raise Exception("The given path is empty, please provide a valid path.")
+    return 1
+
 if __name__ == "__main__":
-    sample = '0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0'
+    path = None
+    print(check_path(path))
+    # sample = '0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0'

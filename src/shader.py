@@ -2,12 +2,15 @@ from pxr import Usd, UsdShade
 import logging
 from typing import List, Dict, Any
 from config import USDSHADEMTLX_DATABASE
-from utils import time_execution
+from utils import time_execution, check_path
+
+"""
+TODO:
+- review function names / get feedback on them
+"""
 
 class UsdShadeMtlxShader:
     def __init__(self, stage: Usd.Stage, path: str, id: str) -> None:
-        # constructor for shader class
-        # create local stage if none is given, for unit testing
         self.database = USDSHADEMTLX_DATABASE
         self.stage    = stage
         self.path     = path
@@ -52,15 +55,25 @@ class UsdShadeMtlxShader:
         return list(self.inputs.keys())
 
     def SetParameter(self, param: str, value) -> None:
-        
+        # need to add in some more error handling such as incorrect value type
         if not param in self.inputs.keys(): logging.error("Unable to find parameter")
 
         type = self.inputs[param][0]
         self.shader.CreateInput(param, type).Set(value)
 
     def SetParameters(self, input: Dict[str, Any]) -> None:
+        # need to break loop if there is an error to avoid onslaught
+        # of errors
+
         for key, value in input.items():
             self.SetParameter(param=key, value=value)
+
+    def RevertParameterToDefault(self, param: str) -> None:
+        if not param in self.inputs.keys():
+            raise Exception("Unable to revert paramter: Specified parameter does not exist")
+
+        default_input = self.inputs[param][1]
+        self.SetParameter(param, default_input)
 
     def ConnectToMaterial(self, material, output: str) -> None:
         # same thing here where we automate the output if there is only one output
