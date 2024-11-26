@@ -1,9 +1,9 @@
-from pxr import Sdf, Usd, UsdShade, Tf, UsdGeom
+from pxr import Sdf, Usd, UsdShade, Tf, UsdGeom, Gf
 from config import USDSHADEMTLX_DATABASE
-from typing import List
+from typing import List, Any, Tuple
 from shader import UsdShadeMtlxShader
 from material import UsdShadeMtlxMaterial
-from utils import time_execution
+from utils import time_execution, check_path
 import logging
 
 
@@ -18,11 +18,6 @@ TASKS:
 - create and share documentation
 - present tool
 
-FUNCTIONS:
-- revert parameter to default
-- unassign shader? not prio
-- function for setting material purpose
-- add function for assigning random display colors
 """
 
 class UsdShadeMtlx:
@@ -35,6 +30,7 @@ class UsdShadeMtlx:
             self.stage    = stage 
             self.path     = path if type(path) == Sdf.Path else Sdf.Path(path)
             self.id       = id
+            check_path(self.path)
             self.__setup()
 
         def __setup(self) -> None:
@@ -76,6 +72,16 @@ class UsdShadeMtlx:
     def __init__(self) -> None:
         self.database = USDSHADEMTLX_DATABASE
 
+    def __is_valid_purpose(self, purpose:str) -> int:
+        if purpose == "": return 1
+        if purpose == "preview" or purpose == "full": return 1
+        return 0
+        
+    def __convert_to_prim(self, prim):
+        if type(prim) == Sdf.Path: prim = stage.GetPrimAtPath(prim.pathString); return prim
+        elif type(prim) == str: prim = stage.GetPrimAtPath(prim); return prim
+        else: return prim
+
     def searchForShader(self, filter:str) -> List[str]:
             # this needs better implementation
             filtered_list = []
@@ -104,6 +110,53 @@ class UsdShadeMtlx:
             logging.error("Passed invalid file path")
             return 0
 
+    def __SetDisplayColor(self, prim:Any, color:Tuple[float]=(), random:bool = False) -> None:
+
+        # NOTE: this function is very slow for what its doing, will private it and come back later
+        from random import uniform
+        prim = self.__convert_to_prim(prim)
+        if not prim.GetChildren():
+            if not prim.IsA("Mesh"): logging.warning("You are assigning to a primitve that isn't a Mesh, the displayColor will not work")
+            prim.GetAttribute("primvars:displayColor").Set([Gf.Vec3f(color)])
+        else:
+            for child in prim.GetAllChildren():
+                if child.IsA("Mesh") and not random:
+                    prim.CreateAttribute("primvars:displayColor", Sdf.ValueTypeNames.Color3fArray).Set([Gf.Vec3f(color)])
+                if child.IsA("Mesh") and random:
+                    prim.CreateAttribute("primvars:displayColor", Sdf.ValueTypeNames.Color3fArray).Set(
+                        [Gf.Vec3f(uniform(0, 1), uniform(0, 1), uniform(0, 1))])
+        return
+
+    def SetPurpose(self, stage:Any, prim:Any, purpose:str="") -> None:
+
+        # NOTE: need to do a check for if a given prim exists in the current stage
+        # NOTE: this function is way to overcomplicated atm, will simplify later down the line
+
+        if not self.__is_valid_purpose(purpose): 
+            raise Exception("Given purpose is not valid, either leave empty or use `full` or `preview`")
+        prim = self.__convert_to_prim(prim)
+        if purpose != "": purpose = f":{purpose}"
+
+        bindings: List[str] = ["material:binding", "material:binding:full", "material:binding:preview"]
+        
+        try:
+            bindings_list = [bind for bind in bindings if prim.GetRelationship(bind)]
+        except AttributeError:
+            raise AttributeError("Input prim is invalid. Accepted types: [str, Sdf.Path, Usd.Prim]")
+
+        if len(bindings_list) != 1:
+            raise Exception("No material bindings found")
+
+        current_binding = prim.GetRelationship(bindings_list[0])
+        rm_list = current_binding.GetTargets()
+        targets = []
+        for rm in rm_list:
+            current_binding.RemoveTarget(rm)
+            targets.append(rm)
+
+        rel = prim.CreateRelationship(f"material:binding{purpose}")
+        rel.SetTargets(targets)
+
 if __name__ == "__main__":
     UsdShadeMtlx = UsdShadeMtlx() # need to rename class
     stage = UsdShadeMtlx.CreateLocalStage(filepath="shader_test.usda")
@@ -131,8 +184,8 @@ if __name__ == "__main__":
         image.SetParameter("file", "/home/epalmer/Pictures/wallpapers/Knights.png")
         surface.ConnectInput("base_color", image, "out")
         surface.ConnectToMaterial(material, "out")
-        material.AssignToPath(Sdf.Path("/root/seal"))
-
+        material.AssignToPrim(ref_prim, purpose="full")
+        # UsdShadeMtlx.SetPurpose(stage, "/root/seal", "")
 
     main()
     stage.Save()
