@@ -14,6 +14,31 @@ def time_execution(function):
 
     return wrapper
 
+def function_execution_test(num_tests: int = 1, execute=True):
+    def inner(function):
+        def wrapper(*args, **kwargs):
+            import time
+            overall_time: float = 0
+            for i in range(num_tests):
+                i += 1
+                start = time.perf_counter()
+                function(*args, **kwargs)
+                end = time.perf_counter()
+                overall_time += (end - start)
+                print(f"Test number: {i} | Time to execute: {(end - start):.5f}s")
+            print('\n')
+            print("Average Execution Time: ")
+            print(f"{(overall_time / num_tests):.5f}s")
+
+        return wrapper if execute else None
+    return inner
+
+def str_to_sdfpath(path: str) -> Sdf.Path:
+    if not isinstance(path, str): raise TypeError("Input path must be of type string") 
+    if not Sdf.Path.IsValidPathString(path): raise TypeError("Input path is not a valid Sdf.Path, must remove illegal characters before continuing.")
+
+    return Sdf.Path(path)
+
 def string_conversion(string_value) ->str:
     return string_value
 
@@ -82,5 +107,6 @@ def check_path(path: Sdf.Path) -> bool:
 
 if __name__ == "__main__":
     path = None
-    print(check_path(path))
+    # print(check_path(path))
+    str_to_sdfpath(path="wrong")
     # sample = '0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0'
