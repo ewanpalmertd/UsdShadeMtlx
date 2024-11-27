@@ -24,6 +24,7 @@ def test_usd_core():
     material = stage.DefinePrim(mtl_path, "Material")
 
     shader = stage.DefinePrim(mtl_path.AppendChild("usdpreviewsurface"), "Shader")
+    shader.ApplyAPI("NodeDefAPI")
     shader_attr = shader.CreateAttribute("info:id", Sdf.ValueTypeNames.Token)
     shader_attr.Set("UsdPreviewSurface")
     shader_color_attr = shader.CreateAttribute("inputs:diffuseColor", Sdf.ValueTypeNames.Color3f)
@@ -33,7 +34,7 @@ def test_usd_core():
     material_output = material.CreateAttribute("outputs:surface", Sdf.ValueTypeNames.Token)
     material_output.AddConnection(Sdf.Path('/materials/mtl_test/usdpreviewsurface.outputs:surface'), Usd.ListPositionFrontOfAppendList)
 
-    rel = cube.CreateRelationship("material:binding")
+    rel = cube.CreateRelationship("material:binding", custom=False)
     rel.SetTargets([mtl_path])
 
 
@@ -62,6 +63,7 @@ def test_sdf():
     # create shader attributes
     shader_attr = Sdf.AttributeSpec(shader_spec, "info:id", Sdf.ValueTypeNames.Token)
     shader_attr.default = "UsdPreviewSurface"
+    shader_attr.SetInfo("variability", Sdf.VariabilityUniform)
     shader_color_attr = Sdf.AttributeSpec(shader_spec, "inputs:diffuseColor", Sdf.ValueTypeNames.Color3f)
     shader_color_attr.default = (1.0, 0.0, 0.0)
     shader_output_spec = Sdf.AttributeSpec(shader_spec, "outputs:surface", Sdf.ValueTypeNames.Token)
@@ -71,7 +73,7 @@ def test_sdf():
     material_output_attr.connectionPathList.Append(shader_output_spec.path)
 
     # assign material
-    rel_spec = Sdf.RelationshipSpec(cube_spec, "material:binding")
+    rel_spec = Sdf.RelationshipSpec(cube_spec, "material:binding", custom=False)
     rel_spec.targetPathList.Append(material_spec.path)
 
 
@@ -93,8 +95,6 @@ def test_usdshade():
 
     material.CreateSurfaceOutput().ConnectToSource(shader.ConnectableAPI(), "surface")
     UsdShade.MaterialBindingAPI(cube).Bind(material)
-
-    prim = stage.GetPrimAtPath("/materials/mtl_test")
 
     stage.Save()
     return
