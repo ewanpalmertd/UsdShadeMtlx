@@ -17,6 +17,18 @@ def function_execution_test(num_tests: int = 1):
         return wrapper
     return inner
 
+def time_execution(function):
+    def wrapper(*args, **kwargs):
+        # wrapper
+        import time
+
+        start = time.perf_counter()
+        function(*args, **kwargs)
+        end = time.perf_counter()
+        print(f"{(end - start):.5f}")
+
+    return wrapper
+
 if __name__ == "__main__":
     @function_execution_test(num_tests=1)
     def test_func():
