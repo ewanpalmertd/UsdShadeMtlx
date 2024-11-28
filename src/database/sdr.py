@@ -1,8 +1,22 @@
 from pxr import Sdr
 import json
+import pickle
+import csv
 
 # NOTE: this can only be executed via hython 
 # TODO: currently this cannot be written to json to do Gf/Vt data types, need to find a way to convert back to original values to be reconverted later down the line 
+
+def time_execution(function):
+    def wrapper(*args, **kwargs):
+        # wrapper
+        import time
+
+        start = time.perf_counter()
+        function(*args, **kwargs)
+        end = time.perf_counter()
+        print(f"{(end - start):.5f}")
+
+    return wrapper
 
 class Database:
     def __init__(self):
@@ -10,7 +24,19 @@ class Database:
         self.nodes    = {}
         
         self._get_materialx_nodes()
-        self._write_to_json()
+        # self._write_to_json()
+        # self._write_to_pkl()
+        self._write_to_csv()
+
+    def _write_to_csv(self):
+        with open("database.csv", "w", newline="") as fp:
+            writer = csv.DictWriter(fp ,fieldnames=self.nodes.keys())
+            writer.writeheader()
+            writer.writerow(self.nodes)
+
+    def _write_to_pkl(self):
+        with open("database.pkl", "wb") as fp:
+            pickle.dump(self.nodes, fp)
 
     def _write_to_json(self):
         with open("database.json", "w") as file:
@@ -40,7 +66,7 @@ class Database:
                 _input = {}
                 input_property          = shader_node.GetInput(input)
                 input_property_name     = input_property.GetName()
-                input_property_type     = input_property.GetType()
+                input_property_type     = input_property.GetTypeAsSdfType()
                 input_property_value    = input_property.GetDefaultValue()
                 input_property_metadata = input_property.GetMetadata()
 
@@ -62,7 +88,7 @@ class Database:
                 _output = {}
                 output_property          = shader_node.GetOutput(output)
                 output_property_name     = output_property.GetName()
-                output_property_type     = output_property.GetType()
+                output_property_type     = output_property.GetTypeAsSdfType()
                 output_property_value    = output_property.GetDefaultValue()
                 output_property_metadata = output_property.GetMetadata()
 
@@ -80,4 +106,15 @@ class Database:
 
 
 if __name__ == "__main__":
-    Database()
+    # Database()
+
+    @time_execution # running at 5.53ms, around 1.83ms slower than alternative method, will see later down the line if this has an effect on performance
+    def main():
+        with open("database.csv", "r") as infile:
+            reader = csv.DictReader(infile)
+            mtlx_dictionary = {}
+            for row in reader:
+                for key in row.keys():
+                    mtlx_dictionary[key] = row[key]
+
+    main()
