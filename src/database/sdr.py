@@ -2,10 +2,6 @@ from pxr import Sdr, Sdf, Gf, Vt
 import json
 
 # NOTE: this can only be executed via hython 
-# TODO: currently this cannot be written to json to do Gf/Vt data types, need to find a way to convert back to original values to be reconverted later down the line 
-# TODO: check what type of value are currently causing issues with json
-# TODO: create list of all uniqwue types and reverse engineer from there
-
 # NOTE: convert all data to string and convert all types to string and resolve for example ("pxr.Gf.Vec3f", "(0, 0, 0)"): "pxr.Gf.Vec3f": pxr.Gf.Vec3f only need to do this with json incompatible types
 
 class Database:
@@ -51,11 +47,9 @@ class Database:
 
     def _get_materialx_nodes(self):
 
-        # NOTE: this is a very slow and inefficient way of doing this but it only gets executed once and isnt a part of the main functions
-        self._types=[]
+        # NOTE: this is a very slow and inefficient way of doing this but it only gets executed once and isnt a part of the main functions and is way more efficient than the XML parser
         for node in self.registry.GetNodeNames():
             if not node.startswith("ND_"): continue
-            # if not node == "ND_standard_surface_surfaceshader_100": continue
             
             shader_node  = self.registry.GetShaderNodeByIdentifier(node)
             input_names  = shader_node.GetInputNames()
@@ -106,6 +100,7 @@ class Database:
 
                 converted_type  = self.__convert_types(output_property_type)
 
+                # NOTE: we might not even need default values for outputs but I will keep for now
                 if type(output_property_value) == Vt.StringArray:
                     converted_value = [[]]
                 elif type(output_property_value) == Vt.Vec3fArray or type(output_property_value) == Vt.Vec4fArray:
