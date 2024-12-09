@@ -17,6 +17,8 @@ def time_execution(function):
 
 # NOTE: might switch class functionality to single node rather than managing the entire database as it doesnt seem to necessary
 # TODO: add search function in here
+# TODO: add quick error handling to see if the database exists
+# TODO: find a better place to store database
 
 class DatabaseItem:
 
@@ -45,7 +47,7 @@ class DatabaseItem:
 
     def __check_output(self, input):
         if not input in self.data[self.node]["inputs"].keys(): raise Exception("Inavlid output") 
-    
+
     def Inputs(self) -> None:
         return list( self.data[self.node]["inputs"].keys() )
     
@@ -55,8 +57,6 @@ class DatabaseItem:
     def Metadata(self) -> None:
         return self.data[self.node]["metadata"]
 
-
-    # NOTE: might switch IO to its own class which would be more efficient, but might be too overkill
     def InputType(self, input) -> None:
         self.__check_input(input)
         return self.data[self.node]["inputs"][input]["type"]

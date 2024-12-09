@@ -6,7 +6,24 @@ from utils  import (
     str_to_sdfpath
 )
 
+"""
+FUNCTIONS:
 
+- Connect Displacement
+- Make a check to see if shader is applicable or object is assignable
+- Add in function for custom purpose
+- Connect Volume
+- GetSurfaceOutput
+- GetDisplacementOutput
+- GetVolumeOutput
+
+- SurfaceSource() -> Returns a sdfshader object
+- BaseMaterial???
+
+- Look at Houdini for extra options of functions
+- check to make sure there are no other materials with the same name
+
+"""
 # ------------------------------------------------------------------------------------------------------------
 
 

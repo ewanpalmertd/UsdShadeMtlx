@@ -1,18 +1,39 @@
 from database.database import DatabaseItem
 from utils import str_to_sdfpath, time_execution
 from pxr import Sdf, Usd
-from typing import Any
+from typing import Any, List
 
+
+"""
+FUNCTIONS:
+
+- GetInput() -> Get the value of an input if it exists
+- IsInput(string input) -> checks the database if the input is valid
+- IsOutput(string output) -> same as IsInput but for output
+- GetMetadata
+- GetAttributeMetadata
+- Path() -> returns the location of the 
+- Function to get the ascii data for the shader
+- Apply schema?
+- Shader search function using decent search algo
+- check if there are no shaders with the same name
+- add docstrings
+
+"""
 
 # ------------------------------------------------------------------------------------------------------------
 
 
 class SdfShaderSpec:
-
+    """
+    class representation of a SdfPrimSpec as a shader
+    
+    """
 
     def __init__(self, layer: Sdf.Layer, path, node, node_name=None):
 
-        if not isinstance(layer, Sdf.Layer): raise AttributeError("Layer must be a Sdf.Layer object")
+        if not isinstance(layer, Sdf.Layer): 
+            raise AttributeError("Layer must be a Sdf.Layer object")
         self.layer     = layer
         self.database  = DatabaseItem(node)
         self.node      = self.database.node
@@ -42,6 +63,19 @@ class SdfShaderSpec:
         attribute_spec.default    = value
         attribute_spec.customData = self.database.InputMetadata(attribute)
 
+    def GetInputs(self, authored_only : bool = True) -> List[Any]:
+        """
+        Returns a list of all avaialable inputs on the given node
+
+        params:
+        -- authored_only : bool - if enabled, only returns the inputs that have already been authored ( not default ) 
+        
+        returns:
+        -- a list of inputs with the type string ( might adjust this later on to be a different type )
+        """
+
+        return
+
 
 # ------------------------------------------------------------------------------------------------------------
 
@@ -54,7 +88,6 @@ if __name__ == "__main__":
         prim_spec = Sdf.CreatePrimInLayer(layer, Sdf.Path("/test"))
         prim_spec.specifier = Sdf.SpecifierDef
         prim_spec.typeName = "Cube"
-        
         test_shader = SdfShaderSpec(layer, Sdf.Path("/material"), "ND_standard_surface_surfaceshader_100")
         test_shader.SetAttributeSpec("base_color", (1, 0, 0))
         layer.Save()
