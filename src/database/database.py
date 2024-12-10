@@ -1,6 +1,7 @@
 from pxr import Sdf
 from typing import List
 import json
+import os
 
 
 def time_execution(function):
@@ -22,13 +23,19 @@ def time_execution(function):
 
 class DatabaseItem:
 
-    @time_execution
     def __init__(self, node=None):
-        with open("database.json") as file:
+        with open(f"{os.path.abspath('..')}/database/database.json") as file:
             self.data = json.load(file)
 
-        if not node in self.data.keys(): raise Exception("invalid node")
+        if node not in self.data.keys():
+            raise Exception("invalid node")
+        
         self.node = node
+        if self.node == "ND_standard_surface_surfaceshader_100":
+            self.node_id = "ND_standard_surface_surfaceshader"
+        else:
+            self.node_id = self.node 
+            
         self.__convert_data(node)
 
 
@@ -45,8 +52,8 @@ class DatabaseItem:
     def __check_input(self, input):
         if not input in self.data[self.node]["inputs"].keys(): raise Exception("Inavlid input") 
 
-    def __check_output(self, input):
-        if not input in self.data[self.node]["inputs"].keys(): raise Exception("Inavlid output") 
+    def __check_output(self, output):
+        if not output in self.data[self.node]["outputs"].keys(): raise Exception("Inavlid output") 
 
     def Inputs(self) -> None:
         return list( self.data[self.node]["inputs"].keys() )
@@ -83,7 +90,7 @@ class DatabaseItem:
     
     @staticmethod
     def GetNodes() -> List[str]:
-        with open("database.json") as file:
+        with open(f"{os.path.abspath('..')}/database/database.json") as file:
             data = json.load(file)
         return list(data.keys())
 
