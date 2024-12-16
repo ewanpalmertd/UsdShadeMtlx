@@ -1,4 +1,1 @@
-# UsdShade MaterialX Extension
-
-Package for creating MaterialX USD primitives from UsdShade API
-
+<h1 align="center">UsdShadeMtlx</h1>
