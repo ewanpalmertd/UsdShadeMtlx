@@ -7,8 +7,13 @@
 </div>
 
 ## Contents
+- [Dependencies](#dependencies)
 - [Install](#install)
 
+## Dependencies
+
+Required:
+ - [Core USD Libraries](https://pypi.org/project/usd-core/)
 
 ## Install
 
