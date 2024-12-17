@@ -1,5 +1,6 @@
 import sys
 import os
+from input import SdfShaderInput
 
 sys.path.append(os.path.abspath(".."))
 
@@ -59,10 +60,15 @@ class SdfShaderSpec:
         for output in self.database.Outputs():
             Sdf.AttributeSpec(self.shader_spec, f"outputs:{output}", self.database.OutputType(output))
 
-    def SetAttributeSpec(self, attribute: str, value: Any) -> None:
-        attribute_spec = Sdf.AttributeSpec(self.shader_spec, f"inputs:{attribute}", self.database.InputType(attribute))
-        attribute_spec.default = value
-        attribute_spec.customData = self.database.InputMetadata(attribute)
+    def CreateInput(self, name: str, value=None, customData=None):
+        value_type = self.database.InputType(name)
+        input_name = name if name.startswith("inputs:") else f"inputs:{name}"
+
+        if not customData:
+            data_dictionary = self.database.InputMetadata(name)
+        else:
+            data_dictionary = {**self.database.InputMetadata(name), **customData}
+        return SdfShaderInput(self.shader_spec, input_name, value_type, value,data_dictionary)
 
     def GetInputs(self, authored_only: bool = True) -> List[Any]:
         """
@@ -93,7 +99,7 @@ if __name__ == "__main__":
         material_spec.specifier = Sdf.SpecifierDef
         material_spec.typeName = "Scope"
         test_shader = SdfShaderSpec(layer, Sdf.Path("/material"), "ND_standard_surface_surfaceshader_100")
-        test_shader.SetAttributeSpec("base_color", (1, 0, 0))
+        test_shader.CreateInput("base_color", (0, 1, 0))
         layer.Save()
 
     main()

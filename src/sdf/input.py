@@ -13,12 +13,16 @@ class SdfShaderInput:
     """
     class representation of a shader input for easier manipulation of inputs
     """
-    def __init__(self, shader_class, spec, name: str, value: Any):
-        self.database = shader_class.database
+    
+    def __init__(self, spec, name: str, type, value: Any = None, customData=None):
         self.name = name
         self.type = type
         self.value = value
+        self.customData = customData
         self.input = Sdf.AttributeSpec(spec, name, type)
         self.input.default = value
+        self.input.customData = self.customData
 
-print(os.getcwd())
+
+if __name__ == "__main__":
+    pass
